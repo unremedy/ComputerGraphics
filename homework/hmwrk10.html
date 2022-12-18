@@ -1,1 +1,114 @@
+<!DOCTYPE html>
+<!-- Z-Buffer -->
+<html>
+	<body>
+		<canvas width="600" height="600" id="hmwrk10"></canvas>
+		<script>
+		  class P {
+			constructor(x = 0, y = 0, z = 0) {
+			  this.X = x;
+			  this.Y = y;
+			  this.Z = z;
+			}
 
+			floor() {
+			  return new P(Math.floor(this.X), Math.floor(this.Y), Math.floor(this.Z));
+			}
+
+			sub(other) {
+			  return new P(this.X - other.X, this.Y - other.Y, this.Z - other.Z);
+			}
+
+			length() {
+			  return Math.sqrt(this.X * this.X + this.Y * this.Y + this.Z * this.Z);
+			}
+
+			is_equal(other) {
+			  return this.X === other.X && this.Y === other.Y && this.Z === other.Z;
+			}
+		  }
+		</script>
+
+		<script>
+		  class Plane {
+			constructor(A, B, C, D) {
+			  this.A = A;
+			  this.B = B;
+			  this.C = C;
+			  this.D = D;
+			}
+
+			GetZ(point) {
+			  return -(this.A * point.X + this.B * point.Y + this.D) / this.C;
+			}
+		  }
+
+		  function GetPlane(A, B, C) {
+			let xCoeff = (C.Z - A.Z) * (B.Y - A.Y) - (C.Y - A.Y) * (B.Z - A.Z);
+			let yCoeff = -((C.Z - A.Z) * (B.X - A.X) - (C.X - A.X) * (B.Z - A.Z));
+			let zCoeff = (C.Y - A.Y) * (B.X - A.X) - (C.X - A.X) * (B.Y - A.Y);
+			let dCoeff = -(A.X * xCoeff + A.Y * yCoeff + A.Z * zCoeff);
+
+			return new Plane(xCoeff, yCoeff, zCoeff, dCoeff);
+		  }
+		</script>
+
+		<script>
+		  function ZBuffer(plane1, plane2, z) {
+			let result = [];
+
+			for (let i = 0; i < canvas.width; ++i) {
+			  for (let j = 0; j < canvas.height; ++j) {
+				let point = new P(i, j, z);
+				let z1 = plane1.GetZ(point),
+						z2 = plane2.GetZ(point);
+
+				if (z1 >= z) {
+				  if (z2 >= z) {
+					point.Z = Math.min(z1, z2);
+				  } else {
+					point.Z = z1;
+				  }
+				} else if (z2 >= z) {
+				  point.Z = z2;
+				}
+
+				let color = (point.Z === z ? "gray" : (point.Z === z1 ? "black" : "green" ));
+				result.push({ Point: point, Color: color});
+			  }
+			}
+
+			return result;
+		  }
+		</script>
+
+		<script>
+		  function draw() {
+			context.clearRect(0, 0, 600, 600);
+
+			let points = ZBuffer(GetPlane(A1, B1, C1), GetPlane(A2, B2, C2), z);
+
+			for (let p of points) {
+			  context.fillStyle = p.Color;
+			  context.fillRect(p.Point.X, p.Point.Y, 1, 1);
+			}
+		  }
+
+		  let canvas = document.getElementById("hmwrk10");
+		  let context = canvas.getContext("2d");
+
+		  let A1 = new P(0, 0, 0);
+		  let B1 = new P(220, 123, 623);
+		  let C1 = new P(400, 280, -45);
+
+		  let A2 = new P(690, 423, 0);
+		  let B2 = new P(-14, 5.1, -1.2);
+		  let C2 = new P(-1, -1, -1);
+
+		  let z = 1;
+
+		  draw();
+
+		</script>
+	</body>
+</html>
