@@ -1,1 +1,67 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<canvas width="600" height="600" id="hmwrk4"></canvas>
+		<script>
+			var canvas = document.getElementById("hmwrk4");
+			var ctx = canvas.getContext("2d");
 
+			let x0 = 200;
+			let y0 = 200;
+
+			let R = 150;
+
+			let x = 0;
+			let y = R;
+
+			let F = 2 * (1 - R);
+
+			let shift = true;
+
+			function drawCircle(x0, y0, x, y, F, shift) {
+				while (y > 0) {
+					ctx.fillStyle = '#003333';
+					ctx.fillRect(x + x0, y + y0, 2, 2);
+
+					ctx.fillStyle = '#6600CC'
+					ctx.fillRect(x + x0, -1 * y + y0, 2, 2);
+
+					ctx.fillStyle = '#FFFF00'
+					ctx.fillRect(-1 * x + x0, y + y0, 2, 2);
+
+					ctx.fillStyle = '#33CC33'
+					ctx.fillRect(-1 * x + x0, -1 * y + y0, 2, 2);
+
+					if (F < 0) {
+						if ((2 * (F + y) - 1) <= 0) {
+							x++;
+							F += 2 * x + 1;
+							shift = false;
+						}
+					} else if (F > 0) {
+						if ((2 * (F - x) - 1) > 0) {
+							y--;
+							F += 1 - 2 * y;
+							shift = false;
+						}
+					}
+
+					if (shift) {
+						x++;
+						y--;
+						F += 2 * (x - y - 1);
+					}
+
+					shift = true;
+				}
+			}
+
+			setInterval(function () {
+
+				drawCircle(x0, y0, x, y, F, shift)
+
+			}, 50);
+
+		</script>
+	</body>
+</html>
