@@ -1,1 +1,95 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<canvas width='600' height='800' id="hmwrk1"></canvas>
+		<script>
+			var canvas = document.getElementById('hmwrk1');
+			var ctx = canvas.getContext('2d');
+			var x = 1;
+			var y = 1;
+			var d_x = 1;
+			var d_y = 1;
+			var max_d_x = 2;
+			var max_d_y = 2;
+			var circle_x = 20;
+			var circle_y = 20;
+			var radius = 10;
+			var colour = 0;
+			addEventListener("keydown", change_acceleration);
+			setInterval(animation, 50);
+			
+			function change_acceleration(code) {
+				switch (code.keyCode) {
+					// Space = stop.
+					case 32:
+						d_x = 0;
+						d_y = 0;
+						break;
 
+					// Left
+					case 37:
+						if (d_x > -max_d_x) {
+							--d_x;
+						}
+						break;
+
+					// Up
+					case 38:
+						if (d_y > -max_d_y) {
+							--d_y;
+						}
+						break;
+
+					// Left
+					case 39:
+						if (d_x < max_d_x) {
+							++d_x;
+						}
+						break;
+
+					// Down
+					case 40:
+						if (d_y < max_d_y) {
+							++d_y;
+						}
+						break;
+				}
+			}
+
+			function drawCircle(x, y, radius, i) {
+				ctx.beginPath();
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				ctx.arc(0 + x, 0 + y, radius, 0, 2 * Math.PI);
+
+				ctx.fillStyle = `rgb(color)`;
+				ctx.fill();
+
+			}
+			
+			function animation() {
+
+				drawCircle(x, y, radius, colour)
+
+				if (x >= canvas.width - x) {
+					d_x = -Math.abs(d_x);
+				}
+
+				if (x <= circle_x) {
+					d_x = Math.abs(d_x);
+				}
+
+				if (y >= canvas.height - circle_y) {
+					d_y = -Math.abs(d_y);
+				}
+
+				if (y <= circle_y) {
+					d_y = Math.abs(d_y);
+				}
+
+				y = y + d_y;
+				x = x + d_x;
+
+			}
+		</script>
+	</body>
+</html>
