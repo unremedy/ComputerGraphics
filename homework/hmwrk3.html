@@ -1,1 +1,73 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<style>
+        canvas {
+            background-image: url("./clock.png");
+            background-size: cover;
+            background-repeat: no-repeat;
+            background-position: center center;
+        }
+		</style>
+	</head>
 
+	<body>
+		<canvas width='400' height='400' id="hmwrk3"></canvas>
+		<script>
+		
+			var canvas = document.getElementById('hmwrk3');
+			var ctx = canvas.getContext('2d');
+		
+			var x_start = 200;
+			var y_start = 200;
+			var r = 100;
+			var angle = 270;
+			
+			function DrawLine(x_start, y_start, x1, y1) {
+				var inv = Math.abs(x1 - x_start) < Math.abs(y1 - y_start);
+				if (inv) {
+					[x_start, y_start] = [y_start, x_start];
+					[x1, y1] = [y1, x1];
+				}
+				if (x_start > x1) {
+					[x_start, x1] = [x1, x_start];
+					[y_start, y1] = [y1, y_start];
+				}
+				var dx = x1 - x_start;
+				var dy = Math.abs(y1 - y_start);
+				var e = dx / 2;
+				var y = y_start;
+				var y_shift = 1;
+				if (y_start >= y1) {
+					y_shift = -1;
+				}
+				for (var x = x_start; x <= x1; ++x) {
+					if (inv) {
+						ctx.fillRect(y, x, 1, 1);
+					} else {
+						ctx.fillRect(x, y, 1, 1);
+					}
+					
+					e -= dy;
+					if (e < 0) {
+						e += dx;
+						y += y_shift;
+					}
+				}
+			}
+			
+			function Drawing() {
+				ctx.clearRect(0, 0, canvas.width, canvas.height);
+				angle += 1;
+				if (angle == 360) {
+					angle = 0;
+				}
+				var x1 = r * Math.cos(angle / 180 * 3.14) + x_start;
+				var y1 = r * Math.sin(angle / 180 * 3.14) + y_start;
+				DrawLine(Math.floor(x_start), Math.floor(y_start), Math.floor(x1), Math.floor(y1));
+			}
+			
+			setInterval(Drawing, 50);
+		</script>
+	</body>
+</html>
