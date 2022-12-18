@@ -1,1 +1,146 @@
+<!DOCTYPE html>
+<!-- Interpolation -->
+<html>
+	<body>
+		<canvas width="500" height="500" style="background: lightgreen" id="hmwrk8"></canvas>
+		<button onclick="StateChange()">State change</button>
+		<script>
+			class Point {
+				constructor(x, y) {
+					this.X = x;
+					this.Y = y;
+				}
 
+				floor() {
+					return new Point(Math.floor(this.X), Math.floor(this.Y));
+				}
+
+				minus(other) {
+					return new Point(this.X - other.X, this.Y - other.Y);
+				}
+
+				length() {
+					return Math.sqrt(this.X * this.X + this.Y * this.Y);
+				}
+
+				equals(other) {
+					return this.X === other.X && this.Y === other.Y;
+				}
+			}
+		</script>
+		<script>
+			function DrawLine(point0, point1) {
+				point0 = point0.floor();
+				point1 = point1.floor();
+
+				if (point0.equals(point1)) {
+					return;
+				}
+
+				let dx = Math.abs(point1.X - point0.X);
+				let dy = Math.abs(point1.Y - point0.Y);
+				let sx = (point0.X < point1.X) ? 1 : -1;
+				let sy = (point0.Y < point1.Y) ? 1 : -1;
+				let err = dx - dy;
+
+				let x = point0.X;
+				let y = point0.Y;
+				while (true) {
+					context.fillRect(x, y, 1, 1);
+
+					if ((x === point1.X) && (y === point1.Y))
+						break;
+
+					let e2 = err;
+					if (e2 > -dy) {
+						err -= dy;
+						x += sx;
+					}
+					if (e2 < dx) {
+						err += dx;
+						y += sy;
+					}
+				}
+			}
+
+			function CurveDistance(startPoint, midPoint, endPoint) {
+				let N = midPoint.minus(endPoint).length();
+				let midDistance = startPoint.minus(midPoint);
+				let endDistance = startPoint.minus(endPoint);
+				let k = (midDistance.X * endDistance.Y - midDistance.Y * endDistance.X) / (Math.pow(endDistance.X, 2) - Math.pow(endDistance.Y, 2));
+				return Math.abs(k * N)
+			}
+
+			function DrawCurve(startPoint, midPoint, endPoint) {
+				if (CurveDistance(startPoint, midPoint, endPoint) < 1) {
+					DrawLine(startPoint, endPoint);
+					return
+				}
+
+				let midPoint1 = new Point((startPoint.X + midPoint.X) * 0.5, (startPoint.Y + midPoint.Y) * 0.5);
+				let midPoint2 = new Point((endPoint.X + midPoint.X) * 0.5, (endPoint.Y + midPoint.Y) * 0.5);
+				let edgePoint = new Point((midPoint1.X + midPoint2.X) * 0.5, (midPoint1.Y + midPoint2.Y) * 0.5);
+
+				DrawCurve(startPoint, midPoint1, edgePoint)
+				DrawCurve(edgePoint, midPoint2, endPoint)
+			}
+		</script>
+		<script>
+			function GetCoefficients(points, b0) {
+				let b = [b0];
+				for (let i = 1; i < points.length; i++) {
+					b.push(2 * (points[i - 1].Y - points[i].Y) / (points[i - 1].X - points[i].X) - b[i - 1]);
+				}
+				return b;
+			}
+
+			function GetIntersection(points) {
+				let coefficients = GetCoefficients(points, 0);
+				let midPoints = [];
+				for (let i = 1; i < points.length; i++) {
+					let d0 = points[i - 1].Y - coefficients[i - 1] * points[i - 1].X;
+					let d1 = points[i].Y - coefficients[i] * points[i].X;
+
+					let xM = (d0 - d1) / (coefficients[i] - coefficients[i - 1]);
+					let yM = d0 + coefficients[i - 1] * xM;
+
+					midPoints.push(new Point(xM, yM));
+				}
+				return midPoints
+			}
+
+			function DrawInterpolation(points) {
+				let midPoints = GetIntersection(points);
+				for (let i = 0; i < midPoints.length; ++i) {
+					DrawCurve(points[i], midPoints[i], points[i + 1]);
+				}
+			}
+		</script>
+		<script>
+			let canvas = document.getElementById("hmwrk8");
+			let context = canvas.getContext("2d");
+
+			let points = []
+			let state = false;
+
+			canvas.onclick = event => {
+				if (!state) {
+					let rect = canvas.getBoundingClientRect();
+					let newPoint = new Point(event.clientX - rect.left, event.clientY - rect.top);
+					context.fillRect(newPoint.X - 2, newPoint.Y - 2, 3, 3);
+					points.push(newPoint);
+				}
+			}
+
+			function StateChange() {
+				if (!state) {
+					DrawInterpolation(points);
+					points = [];
+				} else {
+					context.clearRect(0, 0, canvas.width, canvas.height);
+				}
+				state = !state;
+			}
+		</script>
+	</body>
+</html>
