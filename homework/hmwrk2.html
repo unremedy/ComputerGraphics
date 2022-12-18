@@ -1,1 +1,76 @@
+<!DOCTYPE html>
+<html>
+	<body>
+		<canvas width='300' height='300' id="hmwrk2_original"></canvas>
+		<canvas width='300' height='300' id="hmwrk2_filtered"></canvas>
+		<input type="button" class="btn" id="btn_filter" value="Filter it!">
+		<script>
+			// Медианный фильтр
+			function filter() {
+				var size = 3
+				var img_data = ctx_original.getImageData(0, 0, width, height)
+				var img_data_filter = ctx_filtered.createImageData(width, height)
 
+				for (let i = 0; i < width; ++i) {
+					for (let j = 0; j < height; ++j) {
+						const R = []
+						const G = []
+						const B = []
+						const S = []
+
+						for (let k = -size; k <= size; ++k) {
+							for (let l = -size; l <= size; ++l) {
+								R.push(img_data.data[((j + l) * width + i + k) * 4])
+								G.push(img_data.data[((j + l) * width + i + k) * 4 + 1])
+								B.push(img_data.data[((j + l) * width + i + k) * 4 + 2])
+								S.push(img_data.data[((j + l) * width + i + k) * 4 + 3])
+							}
+						}
+
+						R.filter(el => el !== undefined)
+						G.filter(el => el !== undefined)
+						B.filter(el => el !== undefined)
+						S.filter(el => el !== undefined)
+
+						R.sort((x, y) => x - y);
+						G.sort((x, y) => x - y);
+						B.sort((x, y) => x - y);
+						S.sort((x, y) => x - y);
+
+						console.log(R)
+
+						let m = Math.floor(R.length / 2);
+						img_data_filter.data[(j * width + i) * 4] = R[m]
+						img_data_filter.data[(j * width + i) * 4 + 1] = G[m]
+						img_data_filter.data[(j * width + i) * 4 + 2] = B[m]
+						img_data_filter.data[(j * width + i) * 4 + 3] = S[m]
+					}
+				}
+
+				ctx_filtered.putImageData(img_data_filter, 0, 0, 0, 0, width, height);
+			}
+			
+			var cnv_original = document.getElementById('hmwrk2_original');
+			var ctx_original = cnv_original.getContext('2d');
+			
+			var cnv_filtered = document.getElementById("hmwrk2_filtered")
+			var ctx_filtered = cnv_filtered.getContext("2d")
+			
+			var width = cnv_original.width
+			var height = cnv_original.height
+			
+			// Скачивание image
+			var img = new Image()
+			img.setAttribute('crossOrigin', 'Anonymous');
+			img.src = "https://upload.wikimedia.org/wikipedia/commons/e/e7/Jammlich_crop.jpg";
+			
+			// Отрисовка изображения после загрузки
+			img.onload = function () {
+				ctx_original.drawImage(img, 0, 0, width, height)
+				let btn = document.getElementById('btn_filter');
+				btn.addEventListener("click", filter);
+			}
+			
+		</script>
+	</body>
+</html>
